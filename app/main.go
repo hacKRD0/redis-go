@@ -27,6 +27,18 @@ func main() {
 		os.Exit(1)
 	}
 
-	conn.Write([]byte("+PONG\r\n"))
-	conn.Close()
+	for {
+		buffer := make([]byte, 1024)
+		_, err := conn.Read(buffer)
+		if err != nil {
+			fmt.Println("Error reading from connection: ", err.Error())
+			os.Exit(1)
+		}
+
+		if string(buffer) == "*1\r\n$4\r\nPING\r\n" {
+			conn.Write([]byte("+PONG\r\n"))
+		}
+		conn.Close()
+	}
+
 }
