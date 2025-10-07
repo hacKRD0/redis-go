@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"strings"
 )
 
 // Ensures gofmt doesn't remove the "net" and "os" imports in stage 1 (feel free to remove this!)
@@ -43,6 +44,27 @@ func handleClient(conn net.Conn) {
 			return
 		}
 
-		conn.Write([]byte("+PONG\r\n"))
+		_, command, args := parseRequest(string(buffer))
+		switch command {
+		case "PING":
+			conn.Write([]byte("+PONG\r\n"))
+		case "ECHO":
+			str := strings.Join(args, " ")
+			resp := fmt.Sprintf("$%d\r\n%s\r\n", len(str), str)
+			conn.Write([]byte(resp))
+		default:
+			conn.Write([]byte("-ERR unknown command '" + command + "'\r\n"))
+		}
 	}
+}
+
+func parseRequest(request string) (string, string, []string) {
+	parts := strings.Split(request, "\r\n")
+	noOfElements := parts[0][1:]
+	command := parts[2]
+	args := []string{}
+	for i := 4; i < len(parts); i += 2 {
+		args = append(args, parts[i])
+	}
+	return noOfElements, command, args
 }
