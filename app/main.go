@@ -14,6 +14,14 @@ func main() {
 	// You can use print statements as follows for debugging, they'll be visible when running tests.
 	fmt.Println("Logs from your program will appear here!")
 
+	// Read args from the command line
+	args := os.Args[1:]
+	if len(args) != 0 {
+		fmt.Println(args)
+		config := RdbConfig{dir: args[1], dbfilename: args[3]}
+		loadRdb(config)
+	}
+
 	l, err := net.Listen("tcp", "0.0.0.0:6379")
 	if err != nil {
 		fmt.Println("Failed to bind to port 6379")

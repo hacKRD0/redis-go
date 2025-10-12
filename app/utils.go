@@ -10,6 +10,7 @@ import (
 )
 
 var DB sync.Map
+var config RdbConfig
 
 func parseTime(timeString string) time.Time {
 	t, err := time.Parse("2006-01-02 15:04:05", timeString)
@@ -39,8 +40,24 @@ func handleRequest(conn net.Conn, request string) {
 			return
 		}
 		conn.Write([]byte("+" + value + "\r\n"))
+	case "CONFIG":
+		if cmd.args[0] == "GET" {
+			bulkString := handleConfigGet(cmd.args)
+			conn.Write([]byte(bulkString))
+		}
 	default:
 		conn.Write([]byte("-ERR unknown command '" + cmd.cmd + "'\r\n"))
+	}
+}
+
+func handleConfigGet(args []string) string {
+	switch args[1] {
+	case "dir":
+		return fmt.Sprintf("*2\r\n$3\r\ndir\r\n$%d\r\n%s\r\n", len(config.dir), config.dir)
+	case "dbfilename":
+		return fmt.Sprintf("*2\r\n$9\r\ndbfilename\r\n$%d\r\n%s\r\n", len(config.dbfilename), config.dbfilename)
+	default:
+		return ""
 	}
 }
 
@@ -134,4 +151,8 @@ func parseRequest(request string) (string, Cmd) {
 		args = append(args, parts[i])
 	}
 	return noOfElements, Cmd{command, args}
+}
+
+func loadRdb(cfg RdbConfig) {
+	config = cfg
 }

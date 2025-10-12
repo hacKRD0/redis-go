@@ -14,3 +14,8 @@ type Cmd struct {
 	cmd  string
 	args []string
 }
+
+type RdbConfig struct {
+	dir        string
+	dbfilename string
+}
