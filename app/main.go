@@ -17,10 +17,11 @@ func main() {
 	// Read args from the command line
 	args := os.Args[1:]
 	if len(args) != 0 {
-		fmt.Println(args)
-		config := RdbConfig{dir: args[1], dbfilename: args[3]}
-		loadRdb(config)
+		config = Config{rdb_dir: args[1], rdb_filename: args[3]}
 	}
+
+	// Create handler instance
+	h := &handlerImpl{}
 
 	l, err := net.Listen("tcp", "0.0.0.0:6379")
 	if err != nil {
@@ -34,11 +35,11 @@ func main() {
 			fmt.Println("Error accepting connection: ", err.Error())
 			os.Exit(1)
 		}
-		go handleClient(conn)
+		go handleClient(conn, h)
 	}
 }
 
-func handleClient(conn net.Conn) {
+func handleClient(conn net.Conn, h handler) {
 	defer conn.Close()
 	for {
 		buffer := make([]byte, 1024)
@@ -49,6 +50,6 @@ func handleClient(conn net.Conn) {
 			return
 		}
 
-		handleRequest(conn, string(buffer))
+		h.Handle(conn, string(buffer))
 	}
 }

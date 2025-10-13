@@ -10,12 +10,15 @@ type kv struct {
 	t     time.Time
 }
 
-type Cmd struct {
-	cmd  string
-	args []string
-}
-
-type RdbConfig struct {
-	dir        string
-	dbfilename string
+type Config struct {
+	// Port         string
+	// Role         string
+	// MasterHost   string
+	// MasterPort   string
+	// replicaConns map[string]net.Conn
+	// ReplicaMu    sync.Mutex
+	// ReplOffset   int64
+	// ReplicaAcks  map[string]int64
+	rdb_dir      string
+	rdb_filename string
 }
